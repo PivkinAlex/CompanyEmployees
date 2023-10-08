@@ -11,7 +11,7 @@ namespace Contracts
         ICompanyRepository Company { get; }
         IEmployeeRepository Employee { get; }
         IHotelRepository Hotel { get; }
-        ILodgerRepository lodger { get; }
+        ILodgerRepository Lodger { get; }
         void Save();
     }
 }

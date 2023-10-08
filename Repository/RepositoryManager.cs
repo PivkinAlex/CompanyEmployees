@@ -51,7 +51,7 @@ namespace Repository
             get
             {
                 if (_lodgerRepository == null)
-                    _lodgerRepository = new LodgerRepostiory(_repositoryContext);
+                    _lodgerRepository = new LodgerRepository(_repositoryContext);
                 return _lodgerRepository;
             }
         }
