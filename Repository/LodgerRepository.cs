@@ -15,5 +15,9 @@ namespace Repository
         : base(repositoryContext)
         {
         }
+        public IEnumerable<Lodger> GetLodgers(Guid hotelId, bool trackChanges) => FindByCondition(e => e.HotelId.Equals(hotelId), trackChanges)
+            .OrderBy(e => e.Name);
+        public Lodger GetLodger(Guid companyId, Guid id, bool trackChanges) => FindByCondition(e => e.HotelId.Equals(companyId) && e.Id.Equals(id), trackChanges)
+            .SingleOrDefault();
     }
 }

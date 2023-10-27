@@ -10,5 +10,6 @@ namespace Contracts
     public interface IHotelRepository
     {
         IEnumerable<Hotel> GetAllHotels(bool trackChanges);
+        Hotel GetHotel(Guid hotelId, bool trackChanges);
     }
 }

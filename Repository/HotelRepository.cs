@@ -19,5 +19,6 @@ namespace Repository
             FindAll(trackChanges)
             .OrderBy(c => c.Name)
             .ToList();
+        public Hotel GetHotel(Guid hotelId, bool trackChanges) => FindByCondition(c => c.Id.Equals(hotelId), trackChanges).SingleOrDefault();
     }
 }
