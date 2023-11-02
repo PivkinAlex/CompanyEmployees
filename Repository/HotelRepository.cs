@@ -20,5 +20,7 @@ namespace Repository
             .OrderBy(c => c.Name)
             .ToList();
         public Hotel GetHotel(Guid hotelId, bool trackChanges) => FindByCondition(c => c.Id.Equals(hotelId), trackChanges).SingleOrDefault();
+        public void CreateHotel(Hotel hotel) => Create(hotel);
+        public IEnumerable<Hotel> GetByIds(IEnumerable<Guid> ids, bool trackChanges) => FindByCondition(x => ids.Contains(x.Id), trackChanges).ToList();
     }
 }

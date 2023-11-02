@@ -11,5 +11,7 @@ namespace Contracts
     {
         IEnumerable<Hotel> GetAllHotels(bool trackChanges);
         Hotel GetHotel(Guid hotelId, bool trackChanges);
+        void CreateHotel(Hotel hotel);
+        IEnumerable<Hotel> GetByIds(IEnumerable<Guid> ids, bool trackChanges);
     }
 }

@@ -14,6 +14,8 @@ namespace CompanyEmployees
             CreateMap<Hotel, HotelDto>();
             CreateMap<Employee, EmployeeDto>();
             CreateMap<Lodger, LodgerDto>();
+            CreateMap<CompanyForCreationDto, Company>();
+            CreateMap<HotelForCreatonDto, Hotel>();
         }
     }
 }

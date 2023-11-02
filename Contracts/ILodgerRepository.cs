@@ -11,5 +11,6 @@ namespace Contracts
     {
         IEnumerable<Lodger> GetLodgers(Guid hotelId, bool trackChanges);
         Lodger GetLodger(Guid companyId, Guid id, bool trackChanges);
+        void CreateLodgerForHotel(Guid hotelId, Lodger lodger);
     }
 }
