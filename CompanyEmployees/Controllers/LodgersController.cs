@@ -3,6 +3,7 @@ using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CompanyEmployees.Controllers
@@ -74,6 +75,75 @@ namespace CompanyEmployees.Controllers
                 hotelId,
                 id = lodgerToReturn.Id
             }, lodgerToReturn);
+        }
+        [HttpDelete("{id}")]
+        public IActionResult DeleteLodgerForHotel(Guid hotelId, Guid id)
+        {
+            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            if (hotel == null)
+            {
+                _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
+                return NotFound();
+            }
+            var lodgerForHotel = _repository.Lodger.GetLodger(hotelId, id, trackChanges: false);
+            if (lodgerForHotel == null)
+            {
+                _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            _repository.Lodger.DeleteLodger(lodgerForHotel);
+            _repository.Save();
+            return NoContent();
+        }
+        [HttpPut("{id}")]
+        public IActionResult UpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] LodgerForUpdateDto lodger)
+        {
+            if (lodger == null)
+            {
+                _logger.LogError("LodgerForUpdateDto object sent from client is null.");
+                return BadRequest("LodgerForUpdateDto object is null");
+            }
+            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            if (hotel == null)
+            {
+                _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
+                return NotFound();
+            }
+            var lodgerEntity = _repository.Lodger.GetLodger(hotelId, id, trackChanges: true);
+            if (lodgerEntity == null)
+            {
+                _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            _mapper.Map(lodger, lodgerEntity);
+            _repository.Save();
+            return NoContent();
+        }
+        [HttpPatch("{id}")]
+        public IActionResult PartiallyUpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] JsonPatchDocument<LodgerForUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                _logger.LogError("patchDoc object sent from client is null.");
+                return BadRequest("patchDoc object is null");
+            }
+            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            if (hotel == null)
+            {
+                _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
+                return NotFound();
+            }
+            var lodgerEntity = _repository.Lodger.GetLodger(hotelId, id, trackChanges: true);
+            if (lodgerEntity == null)
+            {
+                _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            var lodgerToPatch = _mapper.Map<LodgerForUpdateDto>(lodgerEntity);
+            patchDoc.ApplyTo(lodgerToPatch);
+            _mapper.Map(lodgerToPatch, lodgerEntity);
+            _repository.Save();
+            return NoContent();
         }
     }
 }

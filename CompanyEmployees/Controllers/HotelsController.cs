@@ -92,5 +92,36 @@ namespace CompanyEmployees.Controllers
             var ids = string.Join(",", hotelCollectionToReturn.Select(c => c.Id));
             return CreatedAtRoute("HotelCollection", new { ids }, hotelCollectionToReturn);
         }
+        [HttpDelete("{id}")]
+        public IActionResult DeleteHotel(Guid id)
+        {
+            var hotel = _repository.Hotel.GetHotel(id, trackChanges: false);
+            if (hotel == null)
+            {
+                _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            _repository.Hotel.DeleteHotel(hotel);
+            _repository.Save();
+            return NoContent();
+        }
+        [HttpPut("{id}")]
+        public IActionResult UpdateHotel(Guid id, [FromBody] HotelForUpdateDto hotel)
+        {
+            if (hotel == null)
+            {
+                _logger.LogError("HotelForUpdateDto object sent from client is null.");
+                return BadRequest("HotelForUpdateDto object is null");
+            }
+            var hotelEntity = _repository.Hotel.GetHotel(id, trackChanges: true);
+            if (hotelEntity == null)
+            {
+                _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            _mapper.Map(hotel, hotelEntity);
+            _repository.Save();
+            return NoContent();
+        }
     }
 }

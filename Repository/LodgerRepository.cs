@@ -21,5 +21,9 @@ namespace Repository
             lodger.HotelId = hotelId;
             Create(lodger);
         }
+        public void DeleteLodger(Lodger lodger)
+        {
+            Delete(lodger);
+        }
     }
 }
