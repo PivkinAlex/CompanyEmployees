@@ -22,16 +22,16 @@ namespace CompanyEmployees.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public IActionResult GetHotels()
+        public async Task<IActionResult> GetHotels()
         {
-            var hotels = _repository.Hotel.GetAllHotels(trackChanges: false);
+            var hotels = await _repository.Hotel.GetAllHotelsAsync(trackChanges: false);
             var hotelDto = _mapper.Map<IEnumerable<HotelDto>>(hotels);
             return Ok(hotelDto);
         }
         [HttpGet("{id}", Name = "HotelById")]
-        public IActionResult GetHotel(Guid id)
+        public async Task<IActionResult> GetHotel(Guid id)
         {
-            var hotel = _repository.Hotel.GetHotel(id, trackChanges: false);
+            var hotel = await _repository.Hotel.GetHotelAsync(id, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
@@ -44,7 +44,7 @@ namespace CompanyEmployees.Controllers
             }
         }
         [HttpPost]
-        public IActionResult CreateHotel([FromBody] HotelForCreatonDto hotel)
+        public async Task<IActionResult> CreateHotel([FromBody] HotelForCreatonDto hotel)
         {
             if (hotel == null)
             {
@@ -53,19 +53,19 @@ namespace CompanyEmployees.Controllers
             }
             var hotelEntity = _mapper.Map<Hotel>(hotel);
             _repository.Hotel.CreateHotel(hotelEntity);
-            _repository.Save();
+            await _repository.SaveAsync();
             var hotelToReturn = _mapper.Map<HotelDto>(hotelEntity);
             return CreatedAtRoute("HotelById", new { id = hotelToReturn.Id }, hotelToReturn);
         }
         [HttpGet("collection/({ids})", Name = "HotelCollection")]
-        public IActionResult GetHotelCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
+        public async Task<IActionResult> GetHotelCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             if (ids == null)
             {
                 _logger.LogError("Parameter ids is null");
                 return BadRequest("Parameter ids is null");
             }
-            var hotelEntities = _repository.Hotel.GetByIds(ids, trackChanges: false);
+            var hotelEntities = await _repository.Hotel.GetByIdsAsync(ids, trackChanges: false);
             if (ids.Count() != hotelEntities.Count())
             {
                 _logger.LogError("Some ids are not valid in a collection");
@@ -75,7 +75,7 @@ namespace CompanyEmployees.Controllers
             return Ok(hotelsToReturn);
         }
         [HttpPost("collection")]
-        public IActionResult CreateHotelCollection([FromBody] IEnumerable<HotelForCreatonDto> hotelCollection)
+        public async Task<IActionResult> CreateHotelCollection([FromBody] IEnumerable<HotelForCreatonDto> hotelCollection)
         {
             if (hotelCollection == null)
             {
@@ -87,40 +87,40 @@ namespace CompanyEmployees.Controllers
             {
                 _repository.Hotel.CreateHotel(hotel);
             }
-            _repository.Save();
+            await _repository.SaveAsync();
             var hotelCollectionToReturn = _mapper.Map<IEnumerable<HotelDto>>(hotelEntities);
             var ids = string.Join(",", hotelCollectionToReturn.Select(c => c.Id));
             return CreatedAtRoute("HotelCollection", new { ids }, hotelCollectionToReturn);
         }
         [HttpDelete("{id}")]
-        public IActionResult DeleteHotel(Guid id)
+        public async Task<IActionResult> DeleteHotel(Guid id)
         {
-            var hotel = _repository.Hotel.GetHotel(id, trackChanges: false);
+            var hotel = await _repository.Hotel.GetHotelAsync(id, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
                 return NotFound();
             }
             _repository.Hotel.DeleteHotel(hotel);
-            _repository.Save();
+            await _repository.SaveAsync();
             return NoContent();
         }
         [HttpPut("{id}")]
-        public IActionResult UpdateHotel(Guid id, [FromBody] HotelForUpdateDto hotel)
+        public async Task<IActionResult> UpdateHotel(Guid id, [FromBody] HotelForUpdateDto hotel)
         {
             if (hotel == null)
             {
                 _logger.LogError("HotelForUpdateDto object sent from client is null.");
                 return BadRequest("HotelForUpdateDto object is null");
             }
-            var hotelEntity = _repository.Hotel.GetHotel(id, trackChanges: true);
+            var hotelEntity = await _repository.Hotel.GetHotelAsync(id, trackChanges: true);
             if (hotelEntity == null)
             {
                 _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
                 return NotFound();
             }
             _mapper.Map(hotel, hotelEntity);
-            _repository.Save();
+            await _repository.SaveAsync();
             return NoContent();
         }
     }

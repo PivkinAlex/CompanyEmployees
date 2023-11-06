@@ -22,28 +22,28 @@ namespace CompanyEmployees.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public IActionResult GetLodgersForHotel(Guid hotelId)
+        public async Task<IActionResult> GetLodgersForHotel(Guid hotelId)
         {
-            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
                 return NotFound();
             }
-            var lodgersFromDb = _repository.Lodger.GetLodgers(hotelId, trackChanges: false);
+            var lodgersFromDb = await _repository.Lodger.GetLodgersAsync(hotelId, trackChanges: false);
             var lodgerDto = _mapper.Map<IEnumerable<LodgerDto>>(lodgersFromDb);
             return Ok(lodgerDto);
         }
         [HttpGet("{id}", Name = "GetLodgerForHotel")]
-        public IActionResult GetLodgerForHotel(Guid hotelId, Guid id)
+        public async Task<IActionResult> GetLodgerForHotel(Guid hotelId, Guid id)
         {
-            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
                 return NotFound();
             }
-            var lodgerDb = _repository.Lodger.GetLodger(hotelId, id, trackChanges: false);
+            var lodgerDb = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: false);
             if (lodgerDb == null)
             {
                 _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
@@ -53,14 +53,19 @@ namespace CompanyEmployees.Controllers
             return Ok(lodger);
         }
         [HttpPost]
-        public IActionResult CreateLodgerForHotel(Guid hotelId, [FromBody] LodgerForCreationDto lodger)
+        public async Task<IActionResult> CreateLodgerForHotel(Guid hotelId, [FromBody] LodgerForCreationDto lodger)
         {
             if (lodger == null)
             {
                 _logger.LogError("LodgerForCreationDto object sent from client is null.");
                 return BadRequest("LodgerForCreationDto object is null");
             }
-            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the EmployeeForCreationDto object");
+                return UnprocessableEntity(ModelState);
+            }
+            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
@@ -68,7 +73,7 @@ namespace CompanyEmployees.Controllers
             }
             var lodgerEntity = _mapper.Map<Lodger>(lodger);
             _repository.Lodger.CreateLodgerForHotel(hotelId, lodgerEntity);
-            _repository.Save();
+            await _repository.SaveAsync();
             var lodgerToReturn = _mapper.Map<LodgerDto>(lodgerEntity);
             return CreatedAtRoute("GetLodgerForHotel", new
             {
@@ -77,72 +82,83 @@ namespace CompanyEmployees.Controllers
             }, lodgerToReturn);
         }
         [HttpDelete("{id}")]
-        public IActionResult DeleteLodgerForHotel(Guid hotelId, Guid id)
+        public async Task<IActionResult> DeleteLodgerForHotel(Guid hotelId, Guid id)
         {
-            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
                 return NotFound();
             }
-            var lodgerForHotel = _repository.Lodger.GetLodger(hotelId, id, trackChanges: false);
+            var lodgerForHotel = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: false);
             if (lodgerForHotel == null)
             {
                 _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
                 return NotFound();
             }
             _repository.Lodger.DeleteLodger(lodgerForHotel);
-            _repository.Save();
+            await _repository.SaveAsync();
             return NoContent();
         }
         [HttpPut("{id}")]
-        public IActionResult UpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] LodgerForUpdateDto lodger)
+        public async Task<IActionResult> UpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] LodgerForUpdateDto lodger)
         {
             if (lodger == null)
             {
                 _logger.LogError("LodgerForUpdateDto object sent from client is null.");
                 return BadRequest("LodgerForUpdateDto object is null");
             }
-            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the LodgerForUpdateDto object");
+                return UnprocessableEntity(ModelState);
+            }
+            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
                 return NotFound();
             }
-            var lodgerEntity = _repository.Lodger.GetLodger(hotelId, id, trackChanges: true);
+            var lodgerEntity = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: true);
             if (lodgerEntity == null)
             {
                 _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
                 return NotFound();
             }
             _mapper.Map(lodger, lodgerEntity);
-            _repository.Save();
+            await _repository.SaveAsync();
             return NoContent();
         }
         [HttpPatch("{id}")]
-        public IActionResult PartiallyUpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] JsonPatchDocument<LodgerForUpdateDto> patchDoc)
+        public async Task<IActionResult> PartiallyUpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] JsonPatchDocument<LodgerForUpdateDto> patchDoc)
         {
             if (patchDoc == null)
             {
                 _logger.LogError("patchDoc object sent from client is null.");
                 return BadRequest("patchDoc object is null");
             }
-            var hotel = _repository.Hotel.GetHotel(hotelId, trackChanges: false);
+            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
             {
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
                 return NotFound();
             }
-            var lodgerEntity = _repository.Lodger.GetLodger(hotelId, id, trackChanges: true);
+            var lodgerEntity = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: true);
             if (lodgerEntity == null)
             {
                 _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
                 return NotFound();
             }
             var lodgerToPatch = _mapper.Map<LodgerForUpdateDto>(lodgerEntity);
-            patchDoc.ApplyTo(lodgerToPatch);
+            patchDoc.ApplyTo(lodgerToPatch, ModelState);
+            TryValidateModel(lodgerToPatch);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the patch document");
+                return UnprocessableEntity(ModelState);
+            }
             _mapper.Map(lodgerToPatch, lodgerEntity);
-            _repository.Save();
+            await _repository.SaveAsync();
             return NoContent();
         }
     }

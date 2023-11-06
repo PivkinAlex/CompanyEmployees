@@ -12,6 +12,6 @@ namespace Contracts
         IEmployeeRepository Employee { get; }
         IHotelRepository Hotel { get; }
         ILodgerRepository Lodger { get; }
-        void Save();
+        Task SaveAsync();
     }
 }

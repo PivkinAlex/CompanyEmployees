@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities.DataTransferObjects
 {
-    public class LodgerForUpdateDto
+    public class LodgerForUpdateDto : LodgerForManipulationDto
     {
-        public string Name { get; set; }
     }
 }

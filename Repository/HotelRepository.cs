@@ -6,22 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
     public class HotelRepository : RepositoryBase<Hotel>, IHotelRepository
     {
-        public HotelRepository(RepositoryContext repositoryContext)
-        : base(repositoryContext)
-        {
-        }
-        public IEnumerable<Hotel> GetAllHotels(bool trackChanges) =>
-            FindAll(trackChanges)
-            .OrderBy(c => c.Name)
-            .ToList();
-        public Hotel GetHotel(Guid hotelId, bool trackChanges) => FindByCondition(c => c.Id.Equals(hotelId), trackChanges).SingleOrDefault();
+        public HotelRepository(RepositoryContext repositoryContext) : base(repositoryContext){}
+        public async Task<IEnumerable<Hotel>> GetAllHotelsAsync(bool trackChanges) => await FindAll(trackChanges).OrderBy(c => c.Name).ToListAsync();
+        public async Task<Hotel> GetHotelAsync(Guid hotelId, bool trackChanges) => await FindByCondition(c => c.Id.Equals(hotelId), trackChanges).SingleOrDefaultAsync();
         public void CreateHotel(Hotel hotel) => Create(hotel);
-        public IEnumerable<Hotel> GetByIds(IEnumerable<Guid> ids, bool trackChanges) => FindByCondition(x => ids.Contains(x.Id), trackChanges).ToList();
+        public async Task<IEnumerable<Hotel>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges) => await FindByCondition(x => ids.Contains(x.Id), trackChanges).ToListAsync();
         public void DeleteHotel(Hotel hotel)
         {
             Delete(hotel);

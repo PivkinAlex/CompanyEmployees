@@ -9,10 +9,10 @@ namespace Contracts
 {
     public interface IHotelRepository
     {
-        IEnumerable<Hotel> GetAllHotels(bool trackChanges);
-        Hotel GetHotel(Guid hotelId, bool trackChanges);
+        Task<IEnumerable<Hotel>> GetAllHotelsAsync(bool trackChanges);
+        Task<Hotel> GetHotelAsync(Guid hotelId, bool trackChanges);
         void CreateHotel(Hotel hotel);
-        IEnumerable<Hotel> GetByIds(IEnumerable<Guid> ids, bool trackChanges);
+        Task<IEnumerable<Hotel>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges);
         void DeleteHotel(Hotel hotel);
     }
 }
