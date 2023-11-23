@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Entities.RequestFeatures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Contracts
 {
     public interface ILodgerRepository
     {
-        Task<IEnumerable<Lodger>> GetLodgersAsync(Guid hotelId, bool trackChanges);
+        Task<PagedList<Lodger>> GetLodgersAsync(Guid hotelId, LodgerParameters lodgerParameters, bool trackChanges);
         Task<Lodger> GetLodgerAsync(Guid companyId, Guid id, bool trackChanges);
         void CreateLodgerForHotel(Guid hotelId, Lodger lodger);
         void DeleteLodger(Lodger lodger);

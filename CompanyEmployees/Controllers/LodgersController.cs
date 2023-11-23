@@ -2,9 +2,11 @@
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Entities.RequestFeatures;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace CompanyEmployees.Controllers
 {
@@ -22,7 +24,7 @@ namespace CompanyEmployees.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public async Task<IActionResult> GetLodgersForHotel(Guid hotelId)
+        public async Task<IActionResult> GetLodgersForHotel(Guid hotelId, [FromQuery] LodgerParameters lodgerParameters)
         {
             var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
             if (hotel == null)
@@ -30,7 +32,8 @@ namespace CompanyEmployees.Controllers
                 _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
                 return NotFound();
             }
-            var lodgersFromDb = await _repository.Lodger.GetLodgersAsync(hotelId, trackChanges: false);
+            var lodgersFromDb = await _repository.Lodger.GetLodgersAsync(hotelId, lodgerParameters, trackChanges: false);
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(lodgersFromDb.MetaData));
             var lodgerDto = _mapper.Map<IEnumerable<LodgerDto>>(lodgersFromDb);
             return Ok(lodgerDto);
         }
