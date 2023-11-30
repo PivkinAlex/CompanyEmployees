@@ -34,6 +34,7 @@ namespace CompanyEmployees
             services.AddScoped<ValidateHotelExistsAttribute>();
             services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
             services.AddScoped<ValidateLodgerForHotelExistsAttribute>();
+            services.ConfigureVersioning();
             services.AddControllers(config => {
                 config.RespectBrowserAcceptHeader = true;
                 config.ReturnHttpNotAcceptable = true;

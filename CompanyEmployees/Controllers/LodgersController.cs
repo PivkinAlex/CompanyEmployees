@@ -27,6 +27,7 @@ namespace CompanyEmployees.Controllers
             _dataShaper = dataShaper;
         }
         [HttpGet]
+        [HttpHead]
         public async Task<IActionResult> GetLodgersForHotel(Guid hotelId, [FromQuery] LodgerParameters lodgerParameters)
         {
             var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
