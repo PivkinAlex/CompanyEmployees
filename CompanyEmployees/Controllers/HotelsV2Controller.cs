@@ -5,20 +5,20 @@ using Microsoft.AspNetCore.Mvc;
 namespace CompanyEmployees.Controllers
 {
     [ApiVersion("2.0", Deprecated = true)]
-    [Route("api/companiesv2")]
+    [Route("api/hotelsv2")]
     [ApiController]
-    public class CompaniesV2Controller : ControllerBase
+    public class HotelsV2Controller : ControllerBase
     {
         private readonly IRepositoryManager _repository;
-        public CompaniesV2Controller(IRepositoryManager repository)
+        public HotelsV2Controller(IRepositoryManager repository)
         {
             _repository = repository;
         }
         [HttpGet]
-        public async Task<IActionResult> GetCompanies()
+        public async Task<IActionResult> GetHotels()
         {
-            var companies = await _repository.Company.GetAllCompaniesAsync(trackChanges: false);
-            return Ok(companies);
+            var hotels = await _repository.Hotel.GetAllHotelsAsync(trackChanges: false);
+            return Ok(hotels);
         }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CompanyEmployees.Controllers
 {
+    [ApiVersion("1.0")]
     [Route("api/hotels")]
     [ApiController]
     public class HotelsController : ControllerBase

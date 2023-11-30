@@ -42,6 +42,8 @@ namespace CompanyEmployees.Extensions
                 opt.ApiVersionReader = new HeaderApiVersionReader("api-version");
                 opt.Conventions.Controller<CompaniesController>().HasApiVersion(new ApiVersion(1,0));
                 opt.Conventions.Controller<CompaniesV2Controller>().HasDeprecatedApiVersion(new ApiVersion(2, 0));
+                opt.Conventions.Controller<HotelsController>().HasApiVersion(new ApiVersion(1, 0));
+                opt.Conventions.Controller<HotelsV2Controller>().HasDeprecatedApiVersion(new ApiVersion(2, 0));
             });
         }
         public static void ConfigureRepositoryManager(this IServiceCollection services) => services.AddScoped<IRepositoryManager, RepositoryManager>();
