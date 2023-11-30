@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CompanyEmployees.Controllers
 {
-    [ApiVersion("2.0", Deprecated = true)]
-    [Route("api/hotelsv2")]
+    [Route("api/hotels")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v2")]
     public class HotelsV2Controller : ControllerBase
     {
         private readonly IRepositoryManager _repository;

@@ -11,9 +11,9 @@ using System.Data;
 
 namespace CompanyEmployees.Controllers
 {
-    [ApiVersion("1.0")]
     [Route("api/hotels")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class HotelsController : ControllerBase
     {
         private readonly IRepositoryManager _repository;
@@ -25,6 +25,10 @@ namespace CompanyEmployees.Controllers
             _logger = logger;
             _mapper = mapper;
         }
+        /// <summary>
+        /// Получает список всех отелей
+        /// </summary>
+        /// <returns> Список отелей</returns>.
         [HttpGet(Name = "GetHotels"), Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetHotels()
         {
@@ -47,6 +51,14 @@ namespace CompanyEmployees.Controllers
                 return Ok(hotelDto);
             }
         }
+        /// <summary>
+        /// Создает отель
+        /// </summary>
+        /// <param name="hotel"></param>.
+        /// <returns>Созданная отель</returns>.
+        /// <response code="201"> Возвращает только что созданный элемент</response>.
+        /// <response code="400"> Если элемент равен null</response>.
+        /// <response code="422"> Если модель недействительна</response>.
         [HttpPost]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateHotel([FromBody] HotelForCreatonDto hotel)

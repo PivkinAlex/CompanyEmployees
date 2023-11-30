@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 namespace CompanyEmployees.Controllers
 {
-    [ApiVersion("1.0")]
     [Route("api/companies")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class CompaniesController : ControllerBase
     {
         private readonly IRepositoryManager _repository;
@@ -25,6 +25,10 @@ namespace CompanyEmployees.Controllers
             _logger = logger;
             _mapper = mapper;
         }
+        /// <summary>
+        /// Получает список всех компаний
+        /// </summary>
+        /// <returns> Список компаний</returns>.
         [HttpGet(Name = "GetCompanies"), Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetCompanies()
         {
@@ -47,6 +51,14 @@ namespace CompanyEmployees.Controllers
                 return Ok(companyDto);
             }
         }
+        /// <summary>
+        /// Создает компанию
+        /// </summary>
+        /// <param name="company"></param>.
+        /// <returns>Созданная компания</returns>.
+        /// <response code="201"> Возвращает только что созданный элемент</response>.
+        /// <response code="400"> Если элемент равен null</response>.
+        /// <response code="422"> Если модель недействительна</response>.
         [HttpPost]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
