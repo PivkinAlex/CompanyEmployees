@@ -18,11 +18,13 @@ namespace CompanyEmployees.Controllers
         private readonly IRepositoryManager _repository;
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
-        public LodgersController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper)
+        private readonly IDataShaper<LodgerDto> _dataShaper;
+        public LodgersController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper, IDataShaper<LodgerDto> dataShaper)
         {
             _repository = repository;
             _logger = logger;
             _mapper = mapper;
+            _dataShaper = dataShaper;
         }
         [HttpGet]
         public async Task<IActionResult> GetLodgersForHotel(Guid hotelId, [FromQuery] LodgerParameters lodgerParameters)
@@ -36,7 +38,7 @@ namespace CompanyEmployees.Controllers
             var lodgersFromDb = await _repository.Lodger.GetLodgersAsync(hotelId, lodgerParameters, trackChanges: false);
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(lodgersFromDb.MetaData));
             var lodgerDto = _mapper.Map<IEnumerable<LodgerDto>>(lodgersFromDb);
-            return Ok(lodgerDto);
+            return Ok(_dataShaper.ShapeData(lodgerDto, lodgerParameters.Fields));
         }
         [HttpGet("{id}", Name = "GetLodgerForHotel")]
         public async Task<IActionResult> GetLodgerForHotel(Guid hotelId, Guid id)
@@ -58,7 +60,6 @@ namespace CompanyEmployees.Controllers
         }
         [HttpPost]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-
         public async Task<IActionResult> CreateLodgerForHotel(Guid hotelId, [FromBody] LodgerForCreationDto lodger)
         {
             if (!ModelState.IsValid)
