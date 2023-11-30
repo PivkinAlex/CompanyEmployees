@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CompanyEmployees.ActionFilters;
 using CompanyEmployees.ModelBinders;
 using Contracts;
 using Entities.DataTransferObjects;
@@ -44,13 +45,9 @@ namespace CompanyEmployees.Controllers
             }
         }
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateHotel([FromBody] HotelForCreatonDto hotel)
         {
-            if (hotel == null)
-            {
-                _logger.LogError("HotelForCreationDto object sent from client is null.");
-                return BadRequest("HotelForCreationDto object is null");
-            }
             var hotelEntity = _mapper.Map<Hotel>(hotel);
             _repository.Hotel.CreateHotel(hotelEntity);
             await _repository.SaveAsync();
@@ -93,32 +90,20 @@ namespace CompanyEmployees.Controllers
             return CreatedAtRoute("HotelCollection", new { ids }, hotelCollectionToReturn);
         }
         [HttpDelete("{id}")]
+        [ServiceFilter(typeof(ValidateHotelExistsAttribute))]
         public async Task<IActionResult> DeleteHotel(Guid id)
         {
-            var hotel = await _repository.Hotel.GetHotelAsync(id, trackChanges: false);
-            if (hotel == null)
-            {
-                _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
-                return NotFound();
-            }
+            var hotel = HttpContext.Items["hotel"] as Hotel;
             _repository.Hotel.DeleteHotel(hotel);
             await _repository.SaveAsync();
             return NoContent();
         }
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateHotelExistsAttribute))]
         public async Task<IActionResult> UpdateHotel(Guid id, [FromBody] HotelForUpdateDto hotel)
         {
-            if (hotel == null)
-            {
-                _logger.LogError("HotelForUpdateDto object sent from client is null.");
-                return BadRequest("HotelForUpdateDto object is null");
-            }
-            var hotelEntity = await _repository.Hotel.GetHotelAsync(id, trackChanges: true);
-            if (hotelEntity == null)
-            {
-                _logger.LogInfo($"Hotel with id: {id} doesn't exist in the database.");
-                return NotFound();
-            }
+            var hotelEntity = HttpContext.Items["hotel"] as Hotel;
             _mapper.Map(hotel, hotelEntity);
             await _repository.SaveAsync();
             return NoContent();

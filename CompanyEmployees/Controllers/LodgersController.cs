@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CompanyEmployees.ActionFilters;
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
@@ -56,13 +57,10 @@ namespace CompanyEmployees.Controllers
             return Ok(lodger);
         }
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+
         public async Task<IActionResult> CreateLodgerForHotel(Guid hotelId, [FromBody] LodgerForCreationDto lodger)
         {
-            if (lodger == null)
-            {
-                _logger.LogError("LodgerForCreationDto object sent from client is null.");
-                return BadRequest("LodgerForCreationDto object is null");
-            }
             if (!ModelState.IsValid)
             {
                 _logger.LogError("Invalid model state for the EmployeeForCreationDto object");
@@ -85,54 +83,26 @@ namespace CompanyEmployees.Controllers
             }, lodgerToReturn);
         }
         [HttpDelete("{id}")]
+        [ServiceFilter(typeof(ValidateLodgerForHotelExistsAttribute))]
         public async Task<IActionResult> DeleteLodgerForHotel(Guid hotelId, Guid id)
         {
-            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
-            if (hotel == null)
-            {
-                _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
-                return NotFound();
-            }
-            var lodgerForHotel = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: false);
-            if (lodgerForHotel == null)
-            {
-                _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
-                return NotFound();
-            }
+            var lodgerForHotel = HttpContext.Items["lodger"] as Lodger;
             _repository.Lodger.DeleteLodger(lodgerForHotel);
             await _repository.SaveAsync();
             return NoContent();
         }
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ServiceFilter(typeof(ValidateLodgerForHotelExistsAttribute))]
         public async Task<IActionResult> UpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] LodgerForUpdateDto lodger)
         {
-            if (lodger == null)
-            {
-                _logger.LogError("LodgerForUpdateDto object sent from client is null.");
-                return BadRequest("LodgerForUpdateDto object is null");
-            }
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state for the LodgerForUpdateDto object");
-                return UnprocessableEntity(ModelState);
-            }
-            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
-            if (hotel == null)
-            {
-                _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
-                return NotFound();
-            }
-            var lodgerEntity = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: true);
-            if (lodgerEntity == null)
-            {
-                _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
-                return NotFound();
-            }
+            var lodgerEntity = HttpContext.Items["lodger"] as Lodger;
             _mapper.Map(lodger, lodgerEntity);
             await _repository.SaveAsync();
             return NoContent();
         }
         [HttpPatch("{id}")]
+        [ServiceFilter(typeof(ValidateLodgerForHotelExistsAttribute))]
         public async Task<IActionResult> PartiallyUpdateLodgerForHotel(Guid hotelId, Guid id, [FromBody] JsonPatchDocument<LodgerForUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -140,18 +110,7 @@ namespace CompanyEmployees.Controllers
                 _logger.LogError("patchDoc object sent from client is null.");
                 return BadRequest("patchDoc object is null");
             }
-            var hotel = await _repository.Hotel.GetHotelAsync(hotelId, trackChanges: false);
-            if (hotel == null)
-            {
-                _logger.LogInfo($"Hotel with id: {hotelId} doesn't exist in the database.");
-                return NotFound();
-            }
-            var lodgerEntity = await _repository.Lodger.GetLodgerAsync(hotelId, id, trackChanges: true);
-            if (lodgerEntity == null)
-            {
-                _logger.LogInfo($"Lodger with id: {id} doesn't exist in the database.");
-                return NotFound();
-            }
+            var lodgerEntity = HttpContext.Items["lodger"] as Lodger;
             var lodgerToPatch = _mapper.Map<LodgerForUpdateDto>(lodgerEntity);
             patchDoc.ApplyTo(lodgerToPatch, ModelState);
             TryValidateModel(lodgerToPatch);
