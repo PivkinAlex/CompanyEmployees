@@ -4,8 +4,10 @@ using CompanyEmployees.ModelBinders;
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace CompanyEmployees.Controllers
 {
@@ -23,7 +25,7 @@ namespace CompanyEmployees.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-        [HttpGet]
+        [HttpGet(Name = "GetHotels"), Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetHotels()
         {
             var hotels = await _repository.Hotel.GetAllHotelsAsync(trackChanges: false);

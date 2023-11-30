@@ -20,6 +20,8 @@ namespace CompanyEmployees
             CreateMap<LodgerForUpdateDto, Lodger>().ReverseMap();
             CreateMap<CompanyForUpdateDto, Company>();
             CreateMap<HotelForUpdateDto, Hotel>();
+            CreateMap<UserForRegistrationDto, User>();
+            CreateMap<UserForAuthenticationDto, User>();
         }
     }
 }
